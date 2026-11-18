@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bone Quest — Game Rangka Manusia</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:linear-gradient(135deg,#d7d9dd 0%,#bfc2c7 50%,#e5e6e8 100%);color:#3f4248;min-height:100vh}
+.wrap{max-width:1100px;margin:auto;padding:24px}.hero{text-align:center;margin-bottom:18px}.hero h1{font-size:clamp(28px,5vw,48px);margin:5px 0;color:#8be9fd}.hero p{margin:0;color:#b9c9d9}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:rgba(255,255,255,.72);border:2px solid rgba(255,255,255,.85);border-radius:22px;padding:20px;box-shadow:0 15px 40px #0004}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.pill{padding:9px 13px;border-radius:999px;background:#ffffff12}.pill b{color:#8be9fd}
+.board{position:relative;min-height:510px;display:flex;justify-content:center;align-items:center;background:radial-gradient(circle,#555a62,#25282d);border-radius:18px;overflow:hidden}
+svg{width:90%;height:490px}.bone{fill:#f7f0d5;stroke:#b9ad87;stroke-width:2}.bone:hover{filter:brightness(1.18);cursor:pointer}.target{stroke:#f4c95d;stroke-width:5;filter:drop-shadow(0 0 7px #f4c95d)}
+.controls{margin-top:15px;display:flex;gap:10px;flex-wrap:wrap}button{border:0;border-radius:13px;padding:12px 17px;font-weight:700;cursor:pointer;background:linear-gradient(90deg,#ffd166,#ff9fbd);color:#554c63}button.secondary{background:#ffffffaa;color:#554c63;border:1px solid #ffffff}button:hover{transform:translateY(-1px)}
+.question{font-size:21px;font-weight:750;line-height:1.4;margin:8px 0 16px}.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px}.answer{background:#ffffffcc;color:#554c63;border:2px solid #ffffff;text-align:left}.answer.correct{background:#bff3cf;border-color:#62c978;color:#31553b}.answer.wrong{background:#ffd1dc;border-color:#ff7f9e;color:#7a4050}.feedback{min-height:54px;margin-top:15px;padding:13px;border-radius:14px;background:#ffffff08;color:#d7e3ee}.progress{height:9px;background:#ffffff12;border-radius:20px;overflow:hidden;margin:12px 0 18px}.bar{height:100%;width:0;background:#8be9fd;transition:.3s}.tip{font-size:14px;color:#9eb1c3;margin-top:15px}.hide{display:none}.result{text-align:center;padding:30px}.score{font-size:60px;color:#8be9fd;font-weight:900}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.board{min-height:430px}svg{height:410px}.answers{grid-template-columns:1fr}}
+
+.landing{text-align:center;max-width:720px;margin:30px auto;padding:42px 25px;background:linear-gradient(145deg,#f1f2f3,#cfd1d5);}
+.rainbow{font-size:28px;letter-spacing:7px}.skullHero{font-size:105px;display:inline-block;animation:float 2s ease-in-out infinite;filter:drop-shadow(0 8px 8px #7774)}
+.landing h2{font-size:30px}.landing p{color:#66627a;font-size:17px;max-width:500px;margin:0 auto 24px}
+@keyframes float{50%{transform:translateY(-12px) rotate(3deg)}}
+.jump{animation:jump .7s ease}.sad{animation:sad .8s ease}
+@keyframes jump{0%{transform:translateY(0)}35%{transform:translateY(-38px) rotate(-8deg)}70%{transform:translateY(-10px) rotate(8deg)}100%{transform:translateY(0)}}
+@keyframes sad{0%{transform:rotate(0)}30%{transform:rotate(15deg) scaleY(.75)}60%{transform:rotate(-15deg) scaleY(.7)}100%{transform:rotate(0) scaleY(1)}}
+.yes,.aww{font-size:42px;font-weight:1000;position:fixed;top:90px;left:50%;z-index:20;animation:pop .75s ease}
+.yes{color:#62c978}.aww{color:#ff7f9e}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,20px) scale(.5)}60%{opacity:1;transform:translate(-50%,0) scale(1.15)}100%{opacity:0;transform:translate(-50%,-25px) scale(1)}}
+
+.character-stage{position:relative;width:min(360px,90%);margin:18px auto 24px;padding:18px 15px 18px;border-radius:30px;background:linear-gradient(145deg,#f7f7f8,#c5c8cc);border:3px solid #fff;box-shadow:0 15px 35px #4b4f5555}
+.speech{display:inline-block;background:#fff;border-radius:20px;padding:10px 16px;font-weight:800;color:#4b4e54;box-shadow:0 5px 15px #5553;position:relative;margin-bottom:12px}
+.speech:after{content:"";position:absolute;left:50%;bottom:-9px;border:9px solid transparent;border-top-color:#fff;border-bottom:0;transform:translateX(-50%)}
+.bonie-character{position:relative;width:145px;height:190px;margin:8px auto 10px;cursor:pointer;user-select:none;animation:bonieIdle 2.4s ease-in-out infinite;filter:drop-shadow(0 10px 5px #3335);transition:filter .2s}
+.bonie-character:hover{filter:drop-shadow(0 10px 5px #3335) brightness(1.05)}
+.bonie-head{position:absolute;left:27px;top:8px;width:91px;height:82px;border:6px solid #555960;border-radius:44% 44% 40% 40%;background:#f7f7f4;box-shadow:inset 0 -7px 0 #d9dadd}
+.eye{position:absolute;top:27px;width:14px;height:18px;background:#555960;border-radius:50%}
+.eye.left{left:19px}.eye.right{right:19px}
+.nose{position:absolute;left:36px;top:48px;width:19px;height:13px;background:#555960;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.mouth{position:absolute;left:25px;top:64px;width:40px;height:8px;border-bottom:4px solid #555960;border-radius:0 0 20px 20px}
+.bonie-neck{position:absolute;left:63px;top:86px;width:19px;height:16px;background:#f7f7f4;border:4px solid #555960;border-radius:5px}
+.bonie-body{position:absolute;left:43px;top:98px;width:59px;height:67px;border:6px solid #555960;border-radius:18px 18px 12px 12px;background:#f7f7f4}
+.rib{position:absolute;left:10px;width:27px;height:13px;border-bottom:4px solid #777b80;border-radius:0 0 18px 18px}.r1{top:12px}.r2{top:27px}.r3{top:42px}
+.bonie-arm{position:absolute;top:105px;width:17px;height:61px;background:#f7f7f4;border:5px solid #555960;border-radius:12px}
+.left-arm{left:23px;transform:rotate(18deg)}.right-arm{right:23px;transform:rotate(-18deg)}
+.bonie-leg{position:absolute;top:158px;width:18px;height:31px;background:#f7f7f4;border:5px solid #555960;border-radius:10px}
+.left-leg{left:49px;transform:rotate(5deg)}.right-leg{right:49px;transform:rotate(-5deg)}
+.character-name{font-size:20px;font-weight:1000;letter-spacing:3px;color:#4f5359}.character-hint{font-size:12px;color:#666b72;margin-top:3px}
+.bonieBlink{animation:bonieBlink .45s ease}.bonieJump{animation:bonieJump .75s cubic-bezier(.2,.8,.2,1)}.bonieSad{animation:bonieSad .8s ease}
+@keyframes bonieIdle{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+@keyframes bonieBlink{0%,100%{transform:scaleY(1)}45%{transform:scaleY(.12)}70%{transform:scaleY(1)}}
+@keyframes bonieJump{0%{transform:translateY(0) rotate(0) scale(1)}35%{transform:translateY(-55px) rotate(-12deg) scale(1.08)}65%{transform:translateY(-15px) rotate(12deg) scale(1.04)}100%{transform:translateY(0) rotate(0) scale(1)}}
+@keyframes bonieSad{20%{transform:rotate(15deg) scaleY(.78)}45%{transform:rotate(-15deg) scaleY(.68)}70%{transform:rotate(10deg) scaleY(.82)}100%{transform:rotate(0) scaleY(1)}}
+.yes,.aww{font-size:42px;font-weight:1000;position:fixed;top:90px;left:50%;z-index:20;animation:pop .75s ease}.yes{color:#5a9e6f}.aww{color:#b56b7c}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,20px) scale(.5)}60%{opacity:1;transform:translate(-50%,0) scale(1.15)}100%{opacity:0;transform:translate(-50%,-25px) scale(1)}}
+
+.bonie-dock{position:fixed;right:22px;bottom:18px;z-index:50;pointer-events:none}
+.bonie-dock{isolation:isolate}.bonie-dock .character-stage{width:190px;margin:0;padding:10px 8px 9px;border-radius:22px;box-shadow:0 10px 30px #3335;pointer-events:auto;transform:scale(.72);transform-origin:bottom right}
+.bonie-dock .speech{font-size:11px;padding:7px 10px;margin-bottom:6px}
+.bonie-dock .bonie-character{width:145px;height:190px;margin:4px auto 5px}
+.bonie-dock .character-name{font-size:13px;letter-spacing:2px}
+.bonie-dock .character-hint{display:none}
+@media(max-width:800px){
+  .bonie-dock{right:8px;bottom:8px}
+  .bonie-dock .character-stage{transform:scale(.58)}
+}
+
+/* Bonie: karakter saja, tanpa kotak */
+.bonie-dock .character-stage{
+  width:auto!important;
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+}
+.bonie-dock .speech,
+.bonie-dock .character-name,
+.bonie-dock .character-hint{
+  display:none!important;
+}
+.bonie-dock .bonie-character{
+  margin:0!important;
+  transform:scale(.72);
+  transform-origin:bottom right;
+  filter:drop-shadow(0 10px 5px #3335);
+}
+@media(max-width:800px){
+  .bonie-dock{right:5px!important;bottom:5px!important}
+  .bonie-dock .bonie-character{transform:scale(.58)}
+}
+
+/* Reaksi lucu Bonie */
+.bonie-sparkles,.bonie-tears{
+  position:absolute;
+  left:50%;
+  top:0;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  z-index:60;
+  opacity:0;
+}
+.bonie-sparkles.show{animation:sparkleBurst 1s ease forwards}
+.bonie-tears.show{animation:tearPop 1s ease forwards}
+.spark{position:absolute;font-size:28px;font-weight:1000;line-height:1;color:#ffd43b;text-shadow:0 0 7px #fff2a8,0 0 14px #ffd43b}
+.spark:nth-child(1){left:-65px;top:0}.spark:nth-child(2){left:50px;top:-12px}
+.spark:nth-child(3){left:-35px;top:48px}.spark:nth-child(4){left:32px;top:45px}
+.tear{position:absolute;width:9px;height:17px;background:#73c9ff;border-radius:65% 65% 70% 70%;box-shadow:0 0 5px #dff5ff;top:38px;z-index:65}
+.tear:nth-child(1){left:-22px}.tear:nth-child(2){left:22px}
+@keyframes sparkleBurst{
+  0%{opacity:0;transform:translate(-50%,-40%) scale(.4) rotate(-10deg)}
+  25%{opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(5deg)}
+  75%{opacity:1;transform:translate(-50%,-65%) scale(1) rotate(-5deg)}
+  100%{opacity:0;transform:translate(-50%,-90%) scale(.8)}
+}
+@keyframes tearPop{
+  0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}
+  25%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  70%{opacity:1;transform:translate(-50%,-35%)}
+  100%{opacity:0;transform:translate(-50%,0)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+  <div>BIOLOGY MINI GAME</div>
+  <h1>BONE QUEST</h1>
+  <p>Kenali bagian-bagian rangka manusia dan kumpulkan poin!</p>
+</header>
+
+<section id="landing" class="card landing">
+  <div class="rainbow">BONE QUEST • HUMAN SKELETON</div>
+  <h2>Siap jadi Bone Explorer?</h2>
+  <p>Jawab 10 pertanyaan tentang rangka manusia. Setiap jawaban benar memberi poin!</p>
+  <button id="start">Mulai Quiz</button>
+</section>
+
+<div id="bonieDock" class="bonie-dock hide">
+  <div id="bonieSparkles" class="bonie-sparkles">
+  <span class="spark">✦</span><span class="spark">✧</span><span class="spark">✦</span><span class="spark">✧</span>
+</div>
+<div id="bonieTears" class="bonie-tears">
+  <span class="tear"></span><span class="tear"></span>
+</div>
+  <div class="character-stage">
+    <div id="speech" class="speech">Hai! Aku Bonie!</div>
+    <div id="skullHero" class="bonie-character" role="button" tabindex="0" aria-label="Bonie, karakter rangka interaktif">
+      <div class="bonie-head">
+        <span class="eye left"></span><span class="eye right"></span>
+        <span class="nose"></span>
+        <span class="mouth"></span>
+      </div>
+      <div class="bonie-neck"></div>
+      <div class="bonie-body">
+        <span class="rib r1"></span><span class="rib r2"></span><span class="rib r3"></span>
+      </div>
+      <div class="bonie-arm left-arm"></div><div class="bonie-arm right-arm"></div>
+      <div class="bonie-leg left-leg"></div><div class="bonie-leg right-leg"></div>
+    </div>
+    <div class="character-name">BONIE</div>
+    <div class="character-hint">Klik karakter untuk berinteraksi!</div>
+  </div>
+</div>
+
+<div id="quizScreen" class="grid hide">
+<section class="card">
+  <div class="stats">
+    <div class="pill">Skor: <b id="score">0</b></div>
+    <div class="pill">Soal: <b id="num">1</b>/10</div>
+    <div class="pill">🔥 Streak: <b id="streak">0</b></div>
+  </div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+  <div id="game">
+    <div class="question" id="question"></div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback">Pilih jawaban yang paling tepat.</div>
+    <div class="controls">
+      <button id="next" class="hide">Soal Berikutnya →</button>
+      <button class="secondary" id="reset">Ulangi Quiz</button>
+    </div>
+  </div>
+  <div id="result" class="result hide">
+    <div>🎉 Quiz selesai!</div><div class="score" id="finalScore">0</div>
+    <p id="grade"></p><button id="again">Main Lagi</button>
+  </div>
+</section>
+
+<section class="card anatomy-card">
+      <h2 style="margin-top:0">🔎 Klik Bagian Rangka</h2>
+  <p style="color:#5d6680">Klik tulang yang sedang ditanyakan untuk mendapat petunjuk visual.</p>
+  <div class="board">
+    <svg viewBox="0 0 300 560" aria-label="Ilustrasi rangka manusia">
+      <circle id="skull" class="bone" cx="150" cy="62" r="39"/>
+      <circle fill="#554c63" cx="137" cy="58" r="5"/><circle fill="#554c63" cx="163" cy="58" r="5"/>
+      <path d="M142 76 Q150 82 158 76" fill="none" stroke="#554c63" stroke-width="3"/>
+      <path id="clavicle" class="bone" d="M111 108 Q130 98 150 112 Q170 98 189 108 L185 116 Q165 109 150 122 Q135 109 115 116Z"/>
+      <path id="spine" class="bone" d="M144 112 L156 112 L160 300 L150 320 L140 300Z"/>
+      <g id="ribs" fill="none" stroke="#fff3d6" stroke-width="7" stroke-linecap="round">
+        <path d="M142 130 Q105 118 100 155 Q102 172 140 165"/><path d="M158 130 Q195 118 200 155 Q198 172 160 165"/>
+        <path d="M141 153 Q105 145 105 182 Q108 195 140 190"/><path d="M159 153 Q195 145 195 182 Q192 195 160 190"/>
+        <path d="M141 177 Q112 172 114 205 Q118 215 141 213"/><path d="M159 177 Q188 172 186 205 Q182 215 159 213"/>
+        <path d="M140 201 Q119 199 123 228 Q128 235 143 235"/><path d="M160 201 Q181 199 177 228 Q172 235 157 235"/>
+      </g>
+      <g id="arms" class="bone">
+        <path d="M108 118 L83 145 L65 218 L75 222 L94 151 L116 130Z"/><path d="M192 118 L217 145 L235 218 L225 222 L206 151 L184 130Z"/>
+        <circle cx="70" cy="224" r="10"/><circle cx="230" cy="224" r="10"/>
+        <path d="M66 232 L58 305 L70 308 L77 235Z"/><path d="M234 232 L242 305 L230 308 L223 235Z"/>
+      </g>
+      <path id="pelvis" class="bone" d="M113 238 Q125 250 150 250 Q175 250 187 238 L181 292 Q166 315 150 315 Q134 315 119 292Z"/>
+      <g id="legs" class="bone">
+        <path d="M128 294 L141 294 L138 420 L125 420Z"/><path d="M172 294 L159 294 L162 420 L175 420Z"/>
+        <circle cx="132" cy="425" r="11"/><circle cx="168" cy="425" r="11"/>
+        <path d="M126 432 L117 520 L130 520 L140 432Z"/><path d="M174 432 L183 520 L170 520 L160 432Z"/>
+        <path d="M112 518 L133 518 L138 529 L105 529Z"/><path d="M188 518 L167 518 L162 529 L195 529Z"/>
+      </g>
+    </svg>
+  </div>
+  <div class="tip">💡 Tengkorak melindungi otak, tulang rusuk melindungi organ di dada, dan tulang belakang membantu menopang tubuh.</div>
+</section>
+</div>
+</div>
+<script>
+const questions=[
+ {q:"Tulang apa yang melindungi otak?",a:["Tengkorak","Tulang paha","Tulang rusuk","Tulang panggul"],c:0,id:"skull",info:"Tengkorak adalah pelindung utama otak."},
+ {q:"Bagian rangka yang menopang tubuh dan melindungi sumsum tulang belakang adalah…",a:["Tulang rusuk","Tulang belakang","Tulang lengan","Tulang betis"],c:1,id:"spine",info:"Tulang belakang tersusun dari ruas-ruas tulang belakang."},
+ {q:"Tulang rusuk terutama melindungi…",a:["Otak","Lutut","Jantung dan paru-paru","Telapak kaki"],c:2,id:"ribs",info:"Rangka dada membantu melindungi jantung dan paru-paru."},
+ {q:"Tulang paha disebut juga…",a:["Femur","Tibia","Humerus","Radius"],c:0,id:"legs",info:"Femur adalah tulang terpanjang pada tubuh manusia."},
+ {q:"Tulang panggul berfungsi antara lain untuk…",a:["Melindungi otak","Menopang tubuh dan menghubungkan kaki","Menggerakkan jari","Melindungi mata"],c:1,id:"pelvis",info:"Panggul menopang tubuh dan menjadi penghubung antara badan dan tungkai."},
+ {q:"Tulang selangka berada di sekitar…",a:["Bahu","Pergelangan kaki","Kepala","Lutut"],c:0,id:"clavicle",info:"Tulang selangka (clavicle) menghubungkan tulang dada dengan tulang belikat."},
+ {q:"Manakah yang termasuk fungsi rangka?",a:["Memompa darah","Memberi bentuk tubuh","Mencerna makanan","Menghasilkan suara"],c:1,id:"spine",info:"Rangka memberi bentuk, menopang tubuh, dan membantu melindungi organ."},
+ {q:"Tulang lengan atas disebut…",a:["Humerus","Femur","Fibula","Sternum"],c:0,id:"arms",info:"Humerus adalah tulang panjang pada lengan bagian atas."},
+ {q:"Tulang yang berbentuk pipih dan berada di bagian tengah dada adalah…",a:["Sternum","Femur","Patella","Ulna"],c:0,id:"ribs",info:"Sternum atau tulang dada berada di bagian depan rongga dada."},
+ {q:"Rangka manusia dewasa umumnya memiliki sekitar…",a:["106 tulang","206 tulang","306 tulang","406 tulang"],c:1,id:"spine",info:"Jumlah tulang manusia dewasa umumnya sekitar 206."}
+];
+let i=0,score=0,streak=0,answered=false;
+const $=x=>document.getElementById(x);
+function render(){
+ answered=false;$("num").textContent=i+1;$("bar").style.width=(i/questions.length*100)+"%";
+ $("question").textContent=questions[i].q;$("feedback").textContent="Pilih jawaban yang paling tepat.";
+ $("next").classList.add("hide");$("answers").innerHTML="";
+ document.querySelectorAll(".target").forEach(x=>x.classList.remove("target"));
+ questions[i].a.forEach((x,n)=>{let b=document.createElement("button");b.className="answer";b.textContent=x;b.onclick=()=>answer(n,b);$("answers").appendChild(b)});
+}
+function answer(n,btn){
+
+ if(answered)return;answered=true;let q=questions[i],correct=n===q.c;
+ document.querySelectorAll(".answer").forEach((b,k)=>{if(k===q.c)b.classList.add("correct");if(k===n&&k!==q.c)b.classList.add("wrong")});
+ document.querySelectorAll(".target").forEach(x=>x.classList.remove("target"));
+ $(q.id)?.classList.add("target");
+ if(correct){
+   score+=10+streak*2;streak++;
+   bonieReact("bonieJump","YES! Kamu benar!"); showBonieEffect("correct");
+   $("feedback").textContent="🎉 YES! Benar! "+q.info;
+ } else {
+   streak=0;
+   bonieReact("bonieSad","Aww... coba lagi ya"); showBonieEffect("wrong");
+   $("feedback").textContent="💗 Aww… belum tepat. "+q.info;
+ }
+ $("score").textContent=score;$("streak").textContent=streak;$("next").classList.remove("hide");
+}
+
+const bonie=$("skullHero"), speech=$("speech");
+function bonieReact(type="bonieJump", message=""){
+  bonie.classList.remove("bonieBlink","bonieJump","bonieSad");
+  void bonie.offsetWidth;
+  bonie.classList.add(type);
+  if(message) speech.textContent=message;
+}
+function showBonieEffect(type){
+  const sparkle=$("bonieSparkles"), tears=$("bonieTears");
+  sparkle.classList.remove("show"); tears.classList.remove("show");
+  void (sparkle.offsetWidth + tears.offsetWidth);
+  (type==="correct"?sparkle:tears).classList.add("show");
+}
+
+
+
+$("start").onclick=()=>{$("landing").classList.add("hide");$("quizScreen").classList.remove("hide");$("bonieDock").classList.remove("hide");render()};
+function pop(text,cls){let e=document.createElement("div");e.className=cls;e.textContent=text;document.body.appendChild(e);setTimeout(()=>e.remove(),750)}
+$("next").onclick=()=>{i++;if(i<questions.length)render();else finish()};
+function finish(){
+ $("game").classList.add("hide");$("result").classList.remove("hide");$("finalScore").textContent=score;
+ $("grade").textContent=score>=100?"🏆 Luar biasa! Kamu master rangka manusia!":score>=70?"🌟 Hebat! Pengetahuanmu sudah bagus.":"💪 Terus latihan, kamu pasti makin jago!";
+ $("bar").style.width="100%";
+}
+function reset(){i=0;score=0;streak=0;$("score").textContent=0;$("streak").textContent=0;$("result").classList.add("hide");$("game").classList.remove("hide");$("quizScreen").classList.add("hide");$("landing").classList.remove("hide");$("bonieDock").classList.add("hide");$("skullHero").className="bonie-character";$("speech").textContent="Hai! Aku Bonie!"}
+$("reset").onclick=reset;$("again").onclick=reset;
+</script>
+</body>
+</html>
